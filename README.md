@@ -1,4 +1,4 @@
-<h1 align="center">Hi there, I'm <a href="Timur" target="_blank">Timur</a> 
+<h1 align="center">Hi there, I'm <a href="https://github.com/timyr220" target="_blank">Timur</a> 
 <img src="https://github.com/blackcater/blackcater/raw/main/images/Hi.gif" height="32"/></h1>
 
 # Device Migrator
@@ -50,7 +50,7 @@ Set the required environment variables. For example:
 
 # Run the script.
 
-#### python device_migrator.py
+#### python device-migrator.py
 
 When prompted, enter the name of the device you want to migrate telemetry for. You can enter:
  A specific device name (e.g., Device123).
