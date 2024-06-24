@@ -12,7 +12,7 @@ def authenticate(url, username, password):
     if response.status_code == 200:
         return response.json()['token']
     else:
-        print("Аутентификация не удалась:", response.status_code, response.json())
+        print("Authentication failed:", response.status_code, response.json())
         return None
 
 # Получение всех устройств
@@ -35,7 +35,7 @@ def get_all_devices(token, url):
             has_next = data['hasNext']
             page += 1
         else:
-            print("Не удалось получить устройства:", response.status_code, response.json())
+            print("Failed to get devices:", response.status_code, response.json())
             break
 
     return devices
@@ -51,7 +51,7 @@ def get_device_key(token, url, device_id):
     if response.status_code == 200:
         return response.json()['credentialsId']
     else:
-        print("Не удалось получить ключ устройства:", response.status_code, response.json())
+        print("Failed to obtain device key:", response.status_code, response.json())
         return None
 
 # Сбор телеметрии
@@ -65,7 +65,7 @@ def get_telemetry(token, url, device_id):
     if response.status_code == 200:
         return response.json()
     else:
-        print("Не удалось получить телеметрию:", response.status_code, response.json())
+        print("Failed to receive telemetry:", response.status_code, response.json())
         return None
 
 # Отправка телеметрии
@@ -75,21 +75,21 @@ def send_telemetry(url, device_key, telemetry_data):
         'Content-Type': 'application/json'
     }
     response = requests.post(telemetry_url, json=telemetry_data, headers=headers)
-    print(f"Статус кода ответа отправки телеметрии: {response.status_code}")
-    print(f"Текст ответа отправки телеметрии: {response.text}")
+    print(f"Telemetry sending response code status: {response.status_code}")
+    print(f"Telemetry sending response text: {response.text}")
     try:
         response_json = response.json()
     except ValueError:
         response_json = None
 
     if response.status_code == 200:
-        print("Телеметрия успешно отправлена")
+        print("Telemetry sent successfully")
     else:
-        print("Не удалось отправить телеметрию:", response.status_code, response_json, response.text)
+        print("Failed to send telemetry:", response.status_code, response_json, response.text)
 
 # Основная программа
 tb_pe_url = os.getenv('TB_PE_URL', 'http://localhost:8080')
-tb_ce_url = os.getenv('TB_CE_URL', 'http://10.7.2.159:8080')
+tb_ce_url = os.getenv('TB_CE_URL', 'http://0.0.0.000:8080')
 username = os.getenv('TB_USERNAME', 'tenant@thingsboard.org')
 password = os.getenv('TB_PASSWORD', 'tenant')
 
@@ -102,7 +102,7 @@ if pe_token and ce_token:
     print(f"CE Token: {ce_token}")
 
     # Выбор направления переноса данных
-    direction = input("Введите направление переноса данных (1 для PE -> CE, 2 для CE -> PE): ")
+    direction = input("Enter the direction of data transfer (1 for PE -> CE, 2 for CE -> PE):")
 
     if direction == "1":
         source_token = pe_token
@@ -115,11 +115,11 @@ if pe_token and ce_token:
         target_token = pe_token
         target_url = tb_pe_url
     else:
-        print("Некорректное направление переноса")
+        print("Incorrect transfer direction")
         exit(1)
 
     # Ввод имени устройства
-    device_name = input("Введите имя устройства для поиска (* для всех устройств): ")
+    device_name = input("Enter the device name to search (* for all devices): ")
 
     if device_name == "*":
         source_devices = get_all_devices(source_token, source_url)
@@ -148,7 +148,7 @@ if pe_token and ce_token:
                             key: telemetry_data[key][0]["value"]
                         }
                     }
-                    print(f"Телеметрический payload для {source_device['name']}: {telemetry_payload}")
+                    print(f" payload for {source_device['name']}: {telemetry_payload}")
 
                     for target_device in target_devices:
                         target_device_id = target_device['id']['id']
@@ -156,8 +156,8 @@ if pe_token and ce_token:
                         if target_device_key:
                             send_telemetry(target_url, target_device_key, telemetry_payload)
                         else:
-                            print(f"Не удалось получить ключ для устройства {target_device_id} в целевом ThingsBoard.")
+                            print(f"Failed to obtain a key for the device {target_device_id} in the target ThingsBoard.")
     else:
-        print("Не удалось найти устройство в одном или обоих экземплярах ThingsBoard.")
+        print("The device could not be found in one or both ThingsBoard instances.")
 else:
-    print("Не удалось аутентифицироваться в ThingsBoard PE или CE.")
+    print("Failed to authenticate to ThingsBoard PE or CE.")
